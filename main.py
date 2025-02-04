@@ -59,4 +59,4 @@ else:
 ar_sorted = dict(sorted(ar_dict.items(), key=lambda x: int(x[0])))
 
 # Menampilkan hasil
-print(ar_sorted, "punten")
+print(ar_sorted, "puntenhehe")
