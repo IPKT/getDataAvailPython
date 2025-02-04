@@ -10,7 +10,19 @@ from datetime import timedelta , datetime
 path = "chromedriver.exe"
 from selenium import webdriver
 from rahasia import hehe
+import mysql.connector
 
+#Koneksi DB
+host, user, password, database = hehe.koneksidb()
+conn = mysql.connector.connect(
+    host=host,
+    user=user,
+    password=password,
+    database=database
+)
+
+# con = mysql.connector.connect(mydb)
+cursor = conn.cursor()
 
 driver = webdriver.Chrome()
 driver.get("https://simora.bmkg.go.id/simora/web/login_page")
@@ -60,3 +72,30 @@ ar_sorted = dict(sorted(ar_dict.items(), key=lambda x: int(x[0])))
 
 # Menampilkan hasil
 print(ar_sorted, "puntenhehe")
+
+
+
+# Data tambahan yang perlu disimpan
+kode_site = "ABC123"  # Ganti dengan kode site yang sesuai
+jenis_peralatan = "Seismometer"
+tahun = 2025
+bulan = 1
+
+# Query untuk insert data
+query = f"""
+INSERT INTO data_availability 
+(id, kode_site, jenis_peralatan, tahun, bulan, {', '.join(ar_sorted.keys())})
+VALUES (NULL, %s, %s, %s, %s, {', '.join(['%s'] * len(ar_sorted))})
+"""
+
+# Eksekusi query
+values = (kode_site, jenis_peralatan, tahun, bulan, *ar_sorted.values())
+cursor.execute(query, values)
+
+# Commit perubahan dan tutup koneksi
+conn.commit()
+cursor.close()
+conn.close()
+
+print("Data berhasil disimpan ke database!")
+
