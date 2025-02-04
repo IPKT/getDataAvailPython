@@ -38,7 +38,7 @@ try:
 except:
     driver.close()
 
-driver.get("https://simora.bmkg.go.id/simora/simora_upt/harian_acc/NKA01-2025-01-Intensitymeter%20P-Alert+")
+driver.get("https://simora.bmkg.go.id/simora/simora_upt/harian_acc/NKA02-2025-02-Intensitymeter%20P-Alert+")
 html = driver.page_source
 
 # # URL halaman web yang mengandung variabel `ar`
@@ -70,22 +70,35 @@ else:
 
 ar_sorted = dict(sorted(ar_dict.items(), key=lambda x: int(x[0])))
 
+# Pastikan semua tanggal dari 1 sampai 31 ada dalam dictionary
+for day in range(1, 32):  # 1 sampai 31
+    day_str = str(day)
+    if day_str not in ar_sorted:
+        ar_sorted[day_str] = '0.0'  # Isi nilai kosong dengan 0.0
+
+# Sort agar sesuai urutan tanggal (penting untuk query SQL)
+ar_sorted = dict(sorted(ar_sorted.items(), key=lambda x: int(x[0])))
+
 # Menampilkan hasil
-print(ar_sorted, "puntenhehe")
+print("AR Sorted", ar_sorted)
 
 
 
 # Data tambahan yang perlu disimpan
-kode_site = "ABC123"  # Ganti dengan kode site yang sesuai
+kode_site = "NKA02"  # Ganti dengan kode site yang sesuai
 jenis_peralatan = "Seismometer"
 tahun = 2025
-bulan = 1
+bulan = 2
+
+## Tambahkan backticks (`) pada nama kolom yang berupa angka
+columns = ", ".join([f"`{col}`" for col in ar_sorted.keys()])
+placeholders = ", ".join(["%s"] * len(ar_sorted))
 
 # Query untuk insert data
 query = f"""
 INSERT INTO data_availability 
-(id, kode_site, jenis_peralatan, tahun, bulan, {', '.join(ar_sorted.keys())})
-VALUES (NULL, %s, %s, %s, %s, {', '.join(['%s'] * len(ar_sorted))})
+(id, kode_site, jenis_peralatan, tahun, bulan, {columns})
+VALUES (NULL, %s, %s, %s, %s, {placeholders})
 """
 
 # Eksekusi query
@@ -98,4 +111,5 @@ cursor.close()
 conn.close()
 
 print("Data berhasil disimpan ke database!")
+
 
