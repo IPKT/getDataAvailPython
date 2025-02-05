@@ -111,5 +111,3 @@ cursor.close()
 conn.close()
 
 print("Data berhasil disimpan ke database!")
-
-
